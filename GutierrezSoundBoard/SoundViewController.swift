@@ -15,12 +15,14 @@ class SoundViewController: UIViewController {
     
     @IBOutlet weak var nombreTextField: UITextField!
     
+    @IBOutlet weak var tiempoLabel: UILabel!
     @IBOutlet weak var agregarButton: UIButton!
     
     var grabarAuido:AVAudioRecorder?
     var reproducirAudio:AVAudioPlayer?
     var audioURL:URL?
-    
+    var timer: Timer?
+    var elpasedTime: TimeInterval = 0.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +31,11 @@ class SoundViewController: UIViewController {
         agregarButton.isEnabled = false
 
     }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        timer?.invalidate() // Detén el timer al salir de la vista
+    }
+
     
     @IBAction func grabarTapped(_ sender: Any) {
         
@@ -37,10 +44,12 @@ class SoundViewController: UIViewController {
             grabarButton.setTitle("GRABAR", for: .normal)
             reproducirButton.isEnabled = true
             agregarButton.isEnabled = true
+            timer?.invalidate()
         }else{
             grabarAuido?.record()
             grabarButton.setTitle("DETENER", for: .normal)
             reproducirButton.isEnabled = false
+            startTimer()
         }
     }
     
@@ -57,11 +66,25 @@ class SoundViewController: UIViewController {
         let grabacion = Grabacion(context:context)
         grabacion.nombre = nombreTextField.text
         grabacion.audio = NSData(contentsOf: audioURL!)! as Data
+        grabacion.tiempo = tiempoLabel.text
         (UIApplication.shared.delegate as! AppDelegate).saveContext()
         navigationController!.popViewController(animated: true)
         
     }
-    
+    func startTimer(){
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true){
+            [weak self] timer in
+            guard let self = self else {return}
+            self.elpasedTime += 1.0
+            self.updateTimeLabel()
+        }
+    }
+    func updateTimeLabel() {
+        let minutes = Int(elpasedTime) / 60
+        let seconds = Int(elpasedTime) % 60
+        tiempoLabel.text = String(format: "%02d:%02d", minutes, seconds)
+    }
+
     func configurarGrabacion(){
         do{
             let session = AVAudioSession.sharedInstance()

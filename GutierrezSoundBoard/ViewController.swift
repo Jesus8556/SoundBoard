@@ -30,9 +30,10 @@ class ViewController: UIViewController, UITableViewDelegate , UITableViewDataSou
         return grabaciones.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell",for: indexPath)
         let grabacion = grabaciones[indexPath.row]
         cell.textLabel?.text = grabacion.nombre
+        cell.detailTextLabel?.text=grabacion.tiempo
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -56,7 +57,12 @@ class ViewController: UIViewController, UITableViewDelegate , UITableViewDataSou
             
         }
     }
-
+    @IBAction func volumen(_ sender: UISlider) {
+        let volume = sender.value
+        reproducirAudio?.volume = volume
+        
+    }
+    
 
 }
 
